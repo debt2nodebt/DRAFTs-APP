@@ -9,7 +9,7 @@ from docx2pdf import convert
 pythoncom.CoInitialize()
 
 # Output directory
-output_dir = "./output_files"
+output_dir = "."
 os.makedirs(output_dir, exist_ok=True)
 
 # Templates
