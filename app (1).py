@@ -1,63 +1,45 @@
-import pythoncom
-import win32com.client
 import streamlit as st
-import os
 from docx import Document
-from docx2pdf import convert
+from io import BytesIO
+from datetime import date
+import os
 
-# Initialize COM object
-pythoncom.CoInitialize()
+# Streamlit App Configuration
+st.set_page_config(layout="wide", page_title="Document Generator App")
+st.title("Document Generator App")
 
-# Output directory
-output_dir = "."
-os.makedirs(output_dir, exist_ok=True)
+# Initialize State for Files
+if "generated_files" not in st.session_state:
+    st.session_state.generated_files = {"word_file": None, "pdf_file": None}
 
-# Templates
-Templates = {
-    "bank_draft": "./DRAFTs-APP/Python Bank Draft Template.docx",
-    "cessation_draft": "./DRAFTs-APP/Python Cessation Template.docx",
-    "settlement_draft": "./DRAFTs-APP/Python settlement draft template.docx"
-}
+# Upload Templates
+st.sidebar.title("Upload Templates")
+uploaded_bank_template = st.sidebar.file_uploader("Upload Bank Draft Template", type=["docx"])
+uploaded_cessation_template = st.sidebar.file_uploader("Upload Cessation Template", type=["docx"])
+uploaded_settlement_template = st.sidebar.file_uploader("Upload Settlement Template", type=["docx"])
 
-# Word application object
-word = win32com.client.Dispatch("Word.Application")
-
-# Function to generate Word draft
-def generate_word_draft(template_path, output_path, replacements):
-    doc = Document(template_path)
+# Helper Function: Generate Word Draft
+def generate_word_draft(template_file, replacements):
+    doc = Document(template_file)
     for paragraph in doc.paragraphs:
         for key, value in replacements.items():
             if key in paragraph.text:
                 paragraph.text = paragraph.text.replace(key, value)
-    doc.save(output_path)
 
-# Streamlit app configuration
-st.set_page_config(layout="wide")
-st.title("Document Generator App")
+    output = BytesIO()
+    doc.save(output)
+    output.seek(0)
+    return output
 
-# Initialize state variables for storing file paths
-if "generated_files" not in st.session_state:
-    st.session_state.generated_files = {"word_path": None, "pdf_path": None}
-
-# Function to create download buttons
-def create_download_buttons(word_output_path, pdf_output_path):
-    if word_output_path and os.path.exists(word_output_path):
-        with open(word_output_path, "rb") as file:
-            st.download_button(
-                label="Download Word File",
-                data=file,
-                file_name=os.path.basename(word_output_path),
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            )
-
-    if pdf_output_path and os.path.exists(pdf_output_path):
-        with open(pdf_output_path, "rb") as file:
-            st.download_button(
-                label="Download PDF File",
-                data=file,
-                file_name=os.path.basename(pdf_output_path),
-                mime="application/pdf"
-            )
+# Helper Function: Create Download Buttons
+def create_download_buttons(word_file, file_name):
+    if word_file:
+        st.download_button(
+            label="Download Word File",
+            data=word_file,
+            file_name=f"{file_name}.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        )
 
 # 1. Bank Draft Section
 st.subheader("1. Bank Draft")
@@ -71,28 +53,23 @@ with st.form("bank_draft_form"):
         client_name = st.text_input("Client Name")
         mobile_number = st.text_input("Mobile Number")
     submitted_bank_draft = st.form_submit_button("Generate Bank Draft")
-    
+
     if submitted_bank_draft:
-        if client_name and bank_name:
+        if uploaded_bank_template:
             # Replacements
             replacements = {
                 "{BankName}": bank_name,
                 "{LoanType}": loan_type,
                 "{LoanNumber}": loan_number,
                 "{ClientName}": client_name,
-                "{MobileNumber}": mobile_number
+                "{MobileNumber}": mobile_number,
             }
-            # Generate Word and PDF
-            word_path = f"{output_dir}\\{client_name}_{bank_name}_BankDraft.docx"
-            pdf_path = f"{output_dir}\\{client_name}_{bank_name}_BankDraft.pdf"
-            generate_word_draft(Templates["bank_draft"], word_path, replacements)
-            convert(word_path)  # Convert Word to PDF
-            
-            # Store file paths in session state
-            st.session_state.generated_files["word_path"] = word_path
-            st.session_state.generated_files["pdf_path"] = pdf_path
-            
-            st.success(f"Bank Draft Generated!")
+            # Generate Word File
+            word_file = generate_word_draft(uploaded_bank_template, replacements)
+            st.session_state.generated_files["word_file"] = word_file
+            st.success(f"Bank Draft for {client_name} generated!")
+        else:
+            st.error("Please upload the Bank Draft template.")
 
 # 2. Cessation Draft Section
 st.subheader("2. Cessation Draft")
@@ -103,29 +80,24 @@ with st.form("cessation_draft_form"):
         employee_name = st.text_input("Employee Name")
     with col2:
         cessation_reason = st.text_input("Cessation Reason")
-        cessation_date = st.date_input("Cessation Date")
+        cessation_date = st.date_input("Cessation Date", value=date.today())
     submitted_cessation_draft = st.form_submit_button("Generate Cessation Draft")
-    
+
     if submitted_cessation_draft:
-        if employee_name and employer_name:
+        if uploaded_cessation_template:
             # Replacements
             replacements = {
                 "{EmployerName}": employer_name,
                 "{EmployeeName}": employee_name,
                 "{CessationReason}": cessation_reason,
-                "{CessationDate}": cessation_date.strftime("%d-%m-%Y")
+                "{CessationDate}": cessation_date.strftime("%d-%m-%Y"),
             }
-            # Generate Word and PDF
-            word_path = f"{output_dir}\\{employee_name}_CessationDraft.docx"
-            pdf_path = f"{output_dir}\\{employee_name}_CessationDraft.pdf"
-            generate_word_draft(Templates["cessation_draft"], word_path, replacements)
-            convert(word_path)  # Convert Word to PDF
-            
-            # Store file paths in session state
-            st.session_state.generated_files["word_path"] = word_path
-            st.session_state.generated_files["pdf_path"] = pdf_path
-            
-            st.success(f"Cessation Draft Generated!")
+            # Generate Word File
+            word_file = generate_word_draft(uploaded_cessation_template, replacements)
+            st.session_state.generated_files["word_file"] = word_file
+            st.success(f"Cessation Draft for {employee_name} generated!")
+        else:
+            st.error("Please upload the Cessation Draft template.")
 
 # 3. Settlement Draft Section
 st.subheader("3. Settlement Draft")
@@ -135,34 +107,26 @@ with st.form("settlement_draft_form"):
         creditor_name = st.text_input("Creditor Name")
         settlement_amount = st.text_input("Settlement Amount")
     with col2:
-        due_date = st.date_input("Due Date")
+        due_date = st.date_input("Due Date", value=date.today())
         debtor_name = st.text_input("Debtor Name")
     submitted_settlement_draft = st.form_submit_button("Generate Settlement Draft")
-    
+
     if submitted_settlement_draft:
-        if creditor_name and debtor_name:
+        if uploaded_settlement_template:
             # Replacements
             replacements = {
                 "{CreditorName}": creditor_name,
                 "{SettlementAmount}": settlement_amount,
                 "{DueDate}": due_date.strftime("%d-%m-%Y"),
-                "{DebtorName}": debtor_name
+                "{DebtorName}": debtor_name,
             }
-            # Generate Word and PDF
-            word_path = f"{output_dir}\\{debtor_name}_SettlementDraft.docx"
-            pdf_path = f"{output_dir}\\{debtor_name}_SettlementDraft.pdf"
-            generate_word_draft(Templates["settlement_draft"], word_path, replacements)
-            convert(word_path)  # Convert Word to PDF
-            
-            # Store file paths in session state
-            st.session_state.generated_files["word_path"] = word_path
-            st.session_state.generated_files["pdf_path"] = pdf_path
-            
-            st.success(f"Settlement Draft Generated!")
+            # Generate Word File
+            word_file = generate_word_draft(uploaded_settlement_template, replacements)
+            st.session_state.generated_files["word_file"] = word_file
+            st.success(f"Settlement Draft for {debtor_name} generated!")
+        else:
+            st.error("Please upload the Settlement Draft template.")
 
-# Display download buttons after any form submission
-if st.session_state.generated_files["word_path"] and st.session_state.generated_files["pdf_path"]:
-    create_download_buttons(
-        st.session_state.generated_files["word_path"],
-        st.session_state.generated_files["pdf_path"]
-    )
+# Display Download Buttons
+if st.session_state.generated_files["word_file"]:
+    create_download_buttons(st.session_state.generated_files["word_file"], "Generated_Document")
