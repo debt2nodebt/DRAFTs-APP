@@ -14,9 +14,9 @@ os.makedirs(output_dir, exist_ok=True)
 
 # Templates
 Templates = {
-    "bank_draft": "Python Bank Draft Template.docx",
-    "cessation_draft": "Python Cessation Template.docx",
-    "settlement_draft": "Python settlement draft template.docx"
+    "bank_draft":current_dir / "Python Bank Draft Template.docx",
+    "cessation_draft": current_dir / "Python Cessation Template.docx",
+    "settlement_draft": current_dir / "Python settlement draft template.docx"
 }
 
 # Word application object
