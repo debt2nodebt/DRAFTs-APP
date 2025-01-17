@@ -1,12 +1,12 @@
 import streamlit as st
 import os
 from docx import Document
-from docx2pdf import convert
+import pypandoc
 from pathlib import Path
 
 # Output directory
 output_dir = Path("output_files")
-output_dir.mkdir(parents=True, exist_ok=True)  # Create output directory if it doesn't exist
+output_dir.mkdir(exist_ok=True)  # Create output directory if it doesn't exist
 
 # Templates folder (ensure these files are uploaded to Streamlit Cloud in the correct structure)
 Templates = {
@@ -27,11 +27,11 @@ def generate_word_draft(template_path, output_path, replacements):
     except Exception as e:
         st.error(f"Error generating Word file: {e}")
 
-# Function to convert Word to PDF using docx2pdf
+# Function to convert Word to PDF using pypandoc with wkhtmltopdf engine
 def convert_to_pdf(word_path, pdf_path):
     try:
-        # Using docx2pdf to convert DOCX to PDF
-        convert(word_path, pdf_path)
+        # Convert using pypandoc and specify the wkhtmltopdf engine for PDF conversion
+        pypandoc.convert_file(word_path, 'pdf', outputfile=pdf_path, extra_args=['--pdf-engine=wkhtmltopdf'])
     except Exception as e:
         st.error(f"Failed to convert Word to PDF: {e}")
 
