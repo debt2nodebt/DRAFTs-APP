@@ -1,13 +1,12 @@
 import streamlit as st
 import os
 from docx import Document
-import pypandoc
-pypandoc.download_pandoc()
+from docx2pdf import convert
 from pathlib import Path
 
 # Output directory
 output_dir = Path("output_files")
-output_dir.mkdir(exist_ok=True)  # Create output directory if it doesn't exist
+output_dir.mkdir(parents=True, exist_ok=True)  # Create output directory if it doesn't exist
 
 # Templates folder (ensure these files are uploaded to Streamlit Cloud in the correct structure)
 Templates = {
@@ -28,32 +27,13 @@ def generate_word_draft(template_path, output_path, replacements):
     except Exception as e:
         st.error(f"Error generating Word file: {e}")
 
-# Function to convert Word to PDF using pypandoc
+# Function to convert Word to PDF using docx2pdf
 def convert_to_pdf(word_path, pdf_path):
     try:
-        pypandoc.convert_file(word_path, "pdf", outputfile=pdf_path)
+        # Using docx2pdf to convert DOCX to PDF
+        convert(word_path, pdf_path)
     except Exception as e:
         st.error(f"Failed to convert Word to PDF: {e}")
-
-# Function to display download buttons
-def show_download_buttons(word_path, pdf_path):
-    try:
-        with open(word_path, "rb") as word_file:
-            st.download_button(
-                label="Download Word File",
-                data=word_file.read(),
-                file_name=os.path.basename(word_path),
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            )
-        with open(pdf_path, "rb") as pdf_file:
-            st.download_button(
-                label="Download PDF File",
-                data=pdf_file.read(),
-                file_name=os.path.basename(pdf_path),
-                mime="application/pdf"
-            )
-    except Exception as e:
-        st.error(f"Error creating download buttons: {e}")
 
 # Streamlit app setup
 st.set_page_config(layout="wide")
@@ -87,11 +67,6 @@ with st.form("bank_draft_form"):
             convert_to_pdf(word_path, pdf_path)
             st.success("Bank Draft Generated")
             st.text_area("Generated Files", value=f"{word_path}\n{pdf_path}", height=100)
-
-            # Move download buttons outside of the form
-            show_download_buttons(word_path, pdf_path)
-        else:
-            st.error("Please fill in all required fields.")
 
 # Settlement Draft Section
 st.subheader("2. Settlement Draft")
@@ -127,11 +102,6 @@ with st.form("settlement_draft_form"):
             st.success("Settlement Draft Generated")
             st.text_area("Generated Files", value=f"{word_path}\n{pdf_path}", height=100)
 
-            # Move download buttons outside of the form
-            show_download_buttons(word_path, pdf_path)
-        else:
-            st.error("Please fill in all required fields.")
-
 # Cessation Draft Section
 st.subheader("3. Cessation Draft")
 with st.form("cessation_draft_form"):
@@ -160,8 +130,3 @@ with st.form("cessation_draft_form"):
             convert_to_pdf(word_path, pdf_path)
             st.success("Cessation Draft Generated")
             st.text_area("Generated Files", value=f"{word_path}\n{pdf_path}", height=100)
-
-            # Move download buttons outside of the form
-            show_download_buttons(word_path, pdf_path)
-        else:
-            st.error("Please fill in all required fields.")
