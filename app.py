@@ -2,8 +2,10 @@ import streamlit as st
 import os
 from docx import Document
 import pypandoc
-pypandoc.download_pandoc()
 from pathlib import Path
+
+# Ensure pandoc is downloaded
+pypandoc.download_pandoc()
 
 # Output directory
 output_dir = Path("output_files")
@@ -31,7 +33,8 @@ def generate_word_draft(template_path, output_path, replacements):
 # Function to convert Word to PDF using pypandoc
 def convert_to_pdf(word_path, pdf_path):
     try:
-        pypandoc.convert_file(word_path, "pdf", outputfile=pdf_path)
+        # Using wkhtmltopdf as the PDF engine
+        pypandoc.convert_file(word_path, "pdf", outputfile=pdf_path, extra_args=['--pdf-engine=wkhtmltopdf'])
     except Exception as e:
         st.error(f"Failed to convert Word to PDF: {e}")
 
@@ -86,7 +89,6 @@ with st.form("bank_draft_form"):
             generate_word_draft(Templates["bank_draft"], word_path, replacements)
             convert_to_pdf(word_path, pdf_path)
             st.success("Bank Draft Generated")
-            st.text_area("Generated Files", value=f"{word_path}\n{pdf_path}", height=100)
             show_download_buttons(word_path, pdf_path)
         else:
             st.error("Please fill in all required fields.")
@@ -123,7 +125,6 @@ with st.form("settlement_draft_form"):
             generate_word_draft(Templates["settlement_draft"], word_path, replacements)
             convert_to_pdf(word_path, pdf_path)
             st.success("Settlement Draft Generated")
-            st.text_area("Generated Files", value=f"{word_path}\n{pdf_path}", height=100)
             show_download_buttons(word_path, pdf_path)
         else:
             st.error("Please fill in all required fields.")
@@ -155,7 +156,6 @@ with st.form("cessation_draft_form"):
             generate_word_draft(Templates["cessation_draft"], word_path, replacements)
             convert_to_pdf(word_path, pdf_path)
             st.success("Cessation Draft Generated")
-            st.text_area("Generated Files", value=f"{word_path}\n{pdf_path}", height=100)
             show_download_buttons(word_path, pdf_path)
         else:
             st.error("Please fill in all required fields.")
