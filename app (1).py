@@ -1,47 +1,37 @@
 import streamlit as st
-from docx import Document
-from io import BytesIO
-from datetime import date
 import os
+from docx import Document
+import pypandoc  # For Word to PDF conversion
 
-# Streamlit App Configuration
-st.set_page_config(layout="wide", page_title="Document Generator App")
-st.title("Document Generator App")
+# Set up the output directory
+output_dir = "output_files"
+os.makedirs(output_dir, exist_ok=True)
 
-# Initialize State for Files
-if "generated_files" not in st.session_state:
-    st.session_state.generated_files = {"word_file": None, "pdf_file": None}
+# Templates
+Templates = {
+    "bank_draft": "Python_Bank_Draft_Template.docx",
+    "cessation_draft": "Python_Cessation_Template.docx",
+    "settlement_draft": "Python_Settlement_Draft_Template.docx"
+}
 
-# Upload Templates
-st.sidebar.title("Upload Templates")
-uploaded_bank_template = st.sidebar.file_uploader("Upload Bank Draft Template", type=["docx"])
-uploaded_cessation_template = st.sidebar.file_uploader("Upload Cessation Template", type=["docx"])
-uploaded_settlement_template = st.sidebar.file_uploader("Upload Settlement Template", type=["docx"])
-
-# Helper Function: Generate Word Draft
-def generate_word_draft(template_file, replacements):
-    doc = Document(template_file)
+# Function to generate Word draft
+def generate_word_draft(template_path, output_path, replacements):
+    doc = Document(template_path)
     for paragraph in doc.paragraphs:
         for key, value in replacements.items():
             if key in paragraph.text:
                 paragraph.text = paragraph.text.replace(key, value)
+    doc.save(output_path)
 
-    output = BytesIO()
-    doc.save(output)
-    output.seek(0)
-    return output
+# Function to convert Word to PDF
+def convert_to_pdf(word_path, pdf_path):
+    pypandoc.convert_file(word_path, 'pdf', outputfile=pdf_path)
 
-# Helper Function: Create Download Buttons
-def create_download_buttons(word_file, file_name):
-    if word_file:
-        st.download_button(
-            label="Download Word File",
-            data=word_file,
-            file_name=f"{file_name}.docx",
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        )
+# Streamlit app
+st.set_page_config(layout="wide")
+st.title("Document Generator App")
 
-# 1. Bank Draft Section
+# Bank Draft Section
 st.subheader("1. Bank Draft")
 with st.form("bank_draft_form"):
     col1, col2 = st.columns(2)
@@ -53,80 +43,91 @@ with st.form("bank_draft_form"):
         client_name = st.text_input("Client Name")
         mobile_number = st.text_input("Mobile Number")
     submitted_bank_draft = st.form_submit_button("Generate Bank Draft")
-
+    
     if submitted_bank_draft:
-        if uploaded_bank_template:
+        if client_name and bank_name:
             # Replacements
             replacements = {
                 "{BankName}": bank_name,
                 "{LoanType}": loan_type,
                 "{LoanNumber}": loan_number,
                 "{ClientName}": client_name,
-                "{MobileNumber}": mobile_number,
+                "{MobileNumber}": mobile_number
             }
-            # Generate Word File
-            word_file = generate_word_draft(uploaded_bank_template, replacements)
-            st.session_state.generated_files["word_file"] = word_file
-            st.success(f"Bank Draft for {client_name} generated!")
+            # Generate Word and PDF
+            word_path = f"{output_dir}/{client_name}_{bank_name}_BankDraft.docx"
+            pdf_path = f"{output_dir}/{client_name}_{bank_name}_BankDraft.pdf"
+            generate_word_draft(Templates["bank_draft"], word_path, replacements)
+            convert_to_pdf(word_path, pdf_path)  # Convert Word to PDF
+            st.success(f"Bank Draft Generated: {word_path} and {pdf_path}")
         else:
-            st.error("Please upload the Bank Draft template.")
+            st.error("Please fill in all required fields.")
 
-# 2. Cessation Draft Section
-st.subheader("2. Cessation Draft")
+# Settlement Draft Section
+st.subheader("2. Settlement Draft")
+with st.form("settlement_draft_form"):
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        bank_name = st.text_input("Bank Name")
+        loan_type = st.text_input("Loan Type")
+    with col2:
+        loan_number = st.text_input("Loan Number")
+        loan_amount = st.text_input("Loan Amount")
+    with col3:
+        one_time_payment = st.text_input("One Time Payment")
+        client_name = st.text_input("Client Name")
+        our_mobile_number = st.text_input("Mobile Number")
+    submitted_settlement_draft = st.form_submit_button("Generate Settlement Draft")
+    
+    if submitted_settlement_draft:
+        if client_name and bank_name:
+            # Replacements
+            replacements = {
+                "{BankName}": bank_name,
+                "{LoanType}": loan_type,
+                "{LoanNumber}": loan_number,
+                "{LoanAmount}": loan_amount,
+                "{OneTimePayment}": one_time_payment,
+                "{ClientName}": client_name,
+                "{OurMobileNumber}": our_mobile_number
+            }
+            # Generate Word and PDF
+            word_path = f"{output_dir}/{client_name}_{bank_name}_SettlementDraft.docx"
+            pdf_path = f"{output_dir}/{client_name}_{bank_name}_SettlementDraft.pdf"
+            generate_word_draft(Templates["settlement_draft"], word_path, replacements)
+            convert_to_pdf(word_path, pdf_path)  # Convert Word to PDF
+            st.success(f"Settlement Draft Generated: {word_path} and {pdf_path}")
+        else:
+            st.error("Please fill in all required fields.")
+
+# Cessation Draft Section
+st.subheader("3. Cessation Draft")
 with st.form("cessation_draft_form"):
     col1, col2 = st.columns(2)
     with col1:
-        employer_name = st.text_input("Employer Name")
-        employee_name = st.text_input("Employee Name")
+        bank_name = st.text_input("Bank Name")
+        client_name = st.text_input("Client Name")
     with col2:
-        cessation_reason = st.text_input("Cessation Reason")
-        cessation_date = st.date_input("Cessation Date", value=date.today())
+        loan_type = st.text_input("Loan Type")
+        loan_number = st.text_input("Loan Number")
+        mobile_number = st.text_input("Mobile Number")
     submitted_cessation_draft = st.form_submit_button("Generate Cessation Draft")
-
+    
     if submitted_cessation_draft:
-        if uploaded_cessation_template:
+        if client_name and bank_name:
             # Replacements
             replacements = {
-                "{EmployerName}": employer_name,
-                "{EmployeeName}": employee_name,
-                "{CessationReason}": cessation_reason,
-                "{CessationDate}": cessation_date.strftime("%d-%m-%Y"),
+                "{BankName}": bank_name,
+                "{ClientName}": client_name,
+                "{LoanType}": loan_type,
+                "{LoanNumber}": loan_number,
+                "{MobileNumber}": mobile_number
             }
-            # Generate Word File
-            word_file = generate_word_draft(uploaded_cessation_template, replacements)
-            st.session_state.generated_files["word_file"] = word_file
-            st.success(f"Cessation Draft for {employee_name} generated!")
+            # Generate Word and PDF
+            word_path = f"{output_dir}/{client_name}_{bank_name}_CessationDraft.docx"
+            pdf_path = f"{output_dir}/{client_name}_{bank_name}_CessationDraft.pdf"
+            generate_word_draft(Templates["cessation_draft"], word_path, replacements)
+            convert_to_pdf(word_path, pdf_path)  # Convert Word to PDF
+            st.success(f"Cessation Draft Generated: {word_path} and {pdf_path}")
         else:
-            st.error("Please upload the Cessation Draft template.")
-
-# 3. Settlement Draft Section
-st.subheader("3. Settlement Draft")
-with st.form("settlement_draft_form"):
-    col1, col2 = st.columns(2)
-    with col1:
-        creditor_name = st.text_input("Creditor Name")
-        settlement_amount = st.text_input("Settlement Amount")
-    with col2:
-        due_date = st.date_input("Due Date", value=date.today())
-        debtor_name = st.text_input("Debtor Name")
-    submitted_settlement_draft = st.form_submit_button("Generate Settlement Draft")
-
-    if submitted_settlement_draft:
-        if uploaded_settlement_template:
-            # Replacements
-            replacements = {
-                "{CreditorName}": creditor_name,
-                "{SettlementAmount}": settlement_amount,
-                "{DueDate}": due_date.strftime("%d-%m-%Y"),
-                "{DebtorName}": debtor_name,
-            }
-            # Generate Word File
-            word_file = generate_word_draft(uploaded_settlement_template, replacements)
-            st.session_state.generated_files["word_file"] = word_file
-            st.success(f"Settlement Draft for {debtor_name} generated!")
-        else:
-            st.error("Please upload the Settlement Draft template.")
-
-# Display Download Buttons
-if st.session_state.generated_files["word_file"]:
-    create_download_buttons(st.session_state.generated_files["word_file"], "Generated_Document")
+            st.error("Please fill in all required fields.")
