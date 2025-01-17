@@ -1,17 +1,17 @@
 import streamlit as st
 import os
 from docx import Document
-import pypandoc  # Import for Word to PDF conversion
+import pypandoc
 
 # Output directory
-output_dir = "output_files"
+output_dir = "C:\\Users\\DELL\\Desktop\\Kartik\\OUTPUT FILES"
 os.makedirs(output_dir, exist_ok=True)
 
 # Templates
 Templates = {
-    "bank_draft": "templates/Python Bank Draft Template.docx",
-    "cessation_draft": "templates/Python Cessation Template.docx",
-    "settlement_draft": "templates/Python Settlement Draft Template.docx"
+    "bank_draft": "C:\\Users\\DELL\\Desktop\\Kartik\\python drafts\\Python Bank Draft Template.docx",
+    "cessation_draft": "C:\\Users\\DELL\\Desktop\\Kartik\\python drafts\\Python Cessation Template.docx",
+    "settlement_draft": "C:\\Users\\DELL\\Desktop\\Kartik\\python drafts\\Python settlement draft template.docx"
 }
 
 # Function to generate Word draft
@@ -23,74 +23,114 @@ def generate_word_draft(template_path, output_path, replacements):
                 paragraph.text = paragraph.text.replace(key, value)
     doc.save(output_path)
 
-# Function to convert Word to PDF
-def convert_to_pdf(input_path, output_path):
-    output = pypandoc.convert_file(input_path, "pdf", outputfile=output_path)
-    if output:
-        return output_path
-    else:
-        raise RuntimeError("Failed to convert to PDF.")
+# Function to convert Word to PDF using pypandoc
+def convert_to_pdf(word_path, pdf_path):
+    pypandoc.convert_file(word_path, 'pdf', outputfile=pdf_path)
 
 # Streamlit app
 st.set_page_config(layout="wide")
 st.title("Document Generator App")
 
-# Draft Sections
-def handle_draft(template_key, fields, output_name):
-    if all(fields.values()):
-        replacements = {f"{{{key}}}": value for key, value in fields.items()}
-        word_path = os.path.join(output_dir, f"{output_name}.docx")
-        pdf_path = os.path.join(output_dir, f"{output_name}.pdf")
-        generate_word_draft(Templates[template_key], word_path, replacements)
-        try:
-            convert_to_pdf(word_path, pdf_path)
-            st.success(f"Draft Generated: {word_path} and {pdf_path}")
-            st.text_area("Generated Files", value=f"{word_path}\n{pdf_path}", height=100)
-        except RuntimeError as e:
-            st.error(f"Error: {e}")
-    else:
-        st.error("Please fill in all required fields.")
-
 # Bank Draft Section
 st.subheader("1. Bank Draft")
 with st.form("bank_draft_form"):
-    fields = {
-        "BankName": st.text_input("Bank Name"),
-        "LoanType": st.text_input("Loan Type"),
-        "LoanNumber": st.text_input("Loan Number"),
-        "ClientName": st.text_input("Client Name"),
-        "MobileNumber": st.text_input("Mobile Number")
-    }
-    submitted = st.form_submit_button("Generate Bank Draft")
-    if submitted:
-        handle_draft("bank_draft", fields, f"{fields['ClientName']}_{fields['BankName']}_BankDraft")
+    col1, col2 = st.columns(2)
+    with col1:
+        bank_name = st.text_input("Bank Name")
+        loan_type = st.text_input("Loan Type")
+    with col2:
+        loan_number = st.text_input("Loan Number")
+        client_name = st.text_input("Client Name")
+        mobile_number = st.text_input("Mobile Number")
+    submitted_bank_draft = st.form_submit_button("Generate Bank Draft")
+    
+    if submitted_bank_draft:
+        if client_name and bank_name:
+            # Replacements
+            replacements = {
+                "{BankName}": bank_name,
+                "{LoanType}": loan_type,
+                "{LoanNumber}": loan_number,
+                "{ClientName}": client_name,
+                "{MobileNumber}": mobile_number
+            }
+            # Generate Word and PDF
+            word_path = f"{output_dir}/{client_name}_{bank_name}_BankDraft.docx"
+            pdf_path = f"{output_dir}/{client_name}_{bank_name}_BankDraft.pdf"
+            generate_word_draft(Templates["bank_draft"], word_path, replacements)
+            convert_to_pdf(word_path, pdf_path)
+            st.success(f"Bank Draft Generated: {word_path} and {pdf_path}")
+            st.text_area("Generated Files", value=f"{word_path}\n{pdf_path}", height=100)
+        else:
+            st.error("Please fill in all required fields.")
 
 # Settlement Draft Section
 st.subheader("2. Settlement Draft")
 with st.form("settlement_draft_form"):
-    fields = {
-        "BankName": st.text_input("Bank Name"),
-        "LoanType": st.text_input("Loan Type"),
-        "LoanNumber": st.text_input("Loan Number"),
-        "LoanAmount": st.text_input("Loan Amount"),
-        "OneTimePayment": st.text_input("One Time Payment"),
-        "ClientName": st.text_input("Client Name"),
-        "OurMobileNumber": st.text_input("Mobile Number")
-    }
-    submitted = st.form_submit_button("Generate Settlement Draft")
-    if submitted:
-        handle_draft("settlement_draft", fields, f"{fields['ClientName']}_{fields['BankName']}_SettlementDraft")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        bank_name = st.text_input("Bank Name")
+        loan_type = st.text_input("Loan Type")
+    with col2:
+        loan_number = st.text_input("Loan Number")
+        loan_amount = st.text_input("Loan Amount")
+    with col3:
+        one_time_payment = st.text_input("One Time Payment")
+        client_name = st.text_input("Client Name")
+        our_mobile_number = st.text_input("Mobile Number")
+    submitted_settlement_draft = st.form_submit_button("Generate Settlement Draft")
+    
+    if submitted_settlement_draft:
+        if client_name and bank_name:
+            # Replacements
+            replacements = {
+                "{BankName}": bank_name,
+                "{LoanType}": loan_type,
+                "{LoanNumber}": loan_number,
+                "{LoanAmount}": loan_amount,
+                "{OneTimePayment}": one_time_payment,
+                "{ClientName}": client_name,
+                "{OurMobileNumber}": our_mobile_number
+            }
+            # Generate Word and PDF
+            word_path = f"{output_dir}/{client_name}_{bank_name}_SettlementDraft.docx"
+            pdf_path = f"{output_dir}/{client_name}_{bank_name}_SettlementDraft.pdf"
+            generate_word_draft(Templates["settlement_draft"], word_path, replacements)
+            convert_to_pdf(word_path, pdf_path)
+            st.success(f"Settlement Draft Generated: {word_path} and {pdf_path}")
+            st.text_area("Generated Files", value=f"{word_path}\n{pdf_path}", height=100)
+        else:
+            st.error("Please fill in all required fields.")
 
 # Cessation Draft Section
 st.subheader("3. Cessation Draft")
 with st.form("cessation_draft_form"):
-    fields = {
-        "BankName": st.text_input("Bank Name"),
-        "ClientName": st.text_input("Client Name"),
-        "LoanType": st.text_input("Loan Type"),
-        "LoanNumber": st.text_input("Loan Number"),
-        "MobileNumber": st.text_input("Mobile Number")
-    }
-    submitted = st.form_submit_button("Generate Cessation Draft")
-    if submitted:
-        handle_draft("cessation_draft", fields, f"{fields['ClientName']}_{fields['BankName']}_CessationDraft")
+    col1, col2 = st.columns(2)
+    with col1:
+        bank_name = st.text_input("Bank Name")
+        client_name = st.text_input("Client Name")
+    with col2:
+        loan_type = st.text_input("Loan Type")
+        loan_number = st.text_input("Loan Number")
+        mobile_number = st.text_input("Mobile Number")
+    submitted_cessation_draft = st.form_submit_button("Generate Cessation Draft")
+    
+    if submitted_cessation_draft:
+        if client_name and bank_name:
+            # Replacements
+            replacements = {
+                "{BankName}": bank_name,
+                "{ClientName}": client_name,
+                "{LoanType}": loan_type,
+                "{LoanNumber}": loan_number,
+                "{MobileNumber}": mobile_number
+            }
+            # Generate Word and PDF
+            word_path = f"{output_dir}/{client_name}_{bank_name}_CessationDraft.docx"
+            pdf_path = f"{output_dir}/{client_name}_{bank_name}_CessationDraft.pdf"
+            generate_word_draft(Templates["cessation_draft"], word_path, replacements)
+            convert_to_pdf(word_path, pdf_path)
+            st.success(f"Cessation Draft Generated: {word_path} and {pdf_path}")
+            st.text_area("Generated Files", value=f"{word_path}\n{pdf_path}", height=100)
+        else:
+            st.error("Please fill in all required fields.")
