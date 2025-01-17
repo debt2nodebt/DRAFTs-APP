@@ -2,6 +2,7 @@ import streamlit as st
 import os
 from docx import Document
 import pypandoc
+pypandoc.download_pandoc()
 from pathlib import Path
 
 # Output directory
