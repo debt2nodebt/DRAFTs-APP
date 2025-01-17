@@ -1,7 +1,7 @@
 import streamlit as st
 import os
 from docx import Document
-import pypandoc  # For Word to PDF conversion
+import pypandoc
 from pathlib import Path
 
 # Output directory
@@ -17,12 +17,15 @@ Templates = {
 
 # Function to generate Word draft
 def generate_word_draft(template_path, output_path, replacements):
-    doc = Document(template_path)
-    for paragraph in doc.paragraphs:
-        for key, value in replacements.items():
-            if key in paragraph.text:
-                paragraph.text = paragraph.text.replace(key, value)
-    doc.save(output_path)
+    try:
+        doc = Document(template_path)
+        for paragraph in doc.paragraphs:
+            for key, value in replacements.items():
+                if key in paragraph.text:
+                    paragraph.text = paragraph.text.replace(key, value)
+        doc.save(output_path)
+    except Exception as e:
+        st.error(f"Error generating Word file: {e}")
 
 # Function to convert Word to PDF using pypandoc
 def convert_to_pdf(word_path, pdf_path):
@@ -30,6 +33,26 @@ def convert_to_pdf(word_path, pdf_path):
         pypandoc.convert_file(word_path, "pdf", outputfile=pdf_path)
     except Exception as e:
         st.error(f"Failed to convert Word to PDF: {e}")
+
+# Function to display download buttons
+def show_download_buttons(word_path, pdf_path):
+    try:
+        with open(word_path, "rb") as word_file:
+            st.download_button(
+                label="Download Word File",
+                data=word_file.read(),
+                file_name=os.path.basename(word_path),
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+        with open(pdf_path, "rb") as pdf_file:
+            st.download_button(
+                label="Download PDF File",
+                data=pdf_file.read(),
+                file_name=os.path.basename(pdf_path),
+                mime="application/pdf"
+            )
+    except Exception as e:
+        st.error(f"Error creating download buttons: {e}")
 
 # Streamlit app setup
 st.set_page_config(layout="wide")
@@ -61,8 +84,9 @@ with st.form("bank_draft_form"):
             pdf_path = output_dir / f"{client_name}_{bank_name}_BankDraft.pdf"
             generate_word_draft(Templates["bank_draft"], word_path, replacements)
             convert_to_pdf(word_path, pdf_path)
-            st.success(f"Bank Draft Generated: {word_path} and {pdf_path}")
+            st.success("Bank Draft Generated")
             st.text_area("Generated Files", value=f"{word_path}\n{pdf_path}", height=100)
+            show_download_buttons(word_path, pdf_path)
         else:
             st.error("Please fill in all required fields.")
 
@@ -97,8 +121,9 @@ with st.form("settlement_draft_form"):
             pdf_path = output_dir / f"{client_name}_{bank_name}_SettlementDraft.pdf"
             generate_word_draft(Templates["settlement_draft"], word_path, replacements)
             convert_to_pdf(word_path, pdf_path)
-            st.success(f"Settlement Draft Generated: {word_path} and {pdf_path}")
+            st.success("Settlement Draft Generated")
             st.text_area("Generated Files", value=f"{word_path}\n{pdf_path}", height=100)
+            show_download_buttons(word_path, pdf_path)
         else:
             st.error("Please fill in all required fields.")
 
@@ -128,7 +153,8 @@ with st.form("cessation_draft_form"):
             pdf_path = output_dir / f"{client_name}_{bank_name}_CessationDraft.pdf"
             generate_word_draft(Templates["cessation_draft"], word_path, replacements)
             convert_to_pdf(word_path, pdf_path)
-            st.success(f"Cessation Draft Generated: {word_path} and {pdf_path}")
+            st.success("Cessation Draft Generated")
             st.text_area("Generated Files", value=f"{word_path}\n{pdf_path}", height=100)
+            show_download_buttons(word_path, pdf_path)
         else:
             st.error("Please fill in all required fields.")
