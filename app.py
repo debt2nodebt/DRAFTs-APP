@@ -9,9 +9,9 @@ os.makedirs(output_dir, exist_ok=True)
 
 # Templates
 Templates = {
-    "bank_draft": "C:\\Users\\DELL\\Desktop\\Kartik\\python drafts\\Python Bank Draft Template.docx",
-    "cessation_draft": "C:\\Users\\DELL\\Desktop\\Kartik\\python drafts\\Python Cessation Template.docx",
-    "settlement_draft": "C:\\Users\\DELL\\Desktop\\Kartik\\python drafts\\Python settlement draft template.docx"
+    "bank_draft": "templates\Python_Bank_Draft_Template.docx",
+    "cessation_draft": "templates\Python_Cessation_Template.docx",
+    "settlement_draft": "templates\Python_settlement_draft_template.docx"
 }
 
 # Function to generate Word draft
