@@ -1,4 +1,6 @@
-streamlit
-python-docx
 pdfkit
 wkhtmltopdf
+streamlit
+python-docx
+pypandoc
+
