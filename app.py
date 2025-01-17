@@ -1,25 +1,18 @@
-import pythoncom
-import win32com.client
-
 import streamlit as st
 import os
 from docx import Document
-from docx2pdf import convert  # Import for Word to PDF conversion
+import pypandoc  # For Word to PDF conversion
 
-pythoncom.CoInitialize()
-
-# Output directory
-output_dir = "C:\\Users\\DELL\\Desktop\\Kartik\\OUTPUT FILES"
+# Set up the output directory
+output_dir = "output_files"
 os.makedirs(output_dir, exist_ok=True)
 
 # Templates
 Templates = {
-    "bank_draft": "C:\\Users\\DELL\\Desktop\\Kartik\\python drafts\\Python Bank Draft Template.docx",
-    "cessation_draft": "C:\\Users\\DELL\\Desktop\\Kartik\\python drafts\\Python Cessation Template.docx",
-    "settlement_draft": "C:\\Users\\DELL\\Desktop\\Kartik\\python drafts\\Python settlement draft template.docx"
+    "bank_draft": "templates/Python_Bank_Draft_Template.docx",
+    "cessation_draft": "templates/Python_Cessation_Template.docx",
+    "settlement_draft": "templates/Python_Settlement_Draft_Template.docx"
 }
-
-word = win32com.client.Dispatch("Word.Application")
 
 # Function to generate Word draft
 def generate_word_draft(template_path, output_path, replacements):
@@ -29,6 +22,10 @@ def generate_word_draft(template_path, output_path, replacements):
             if key in paragraph.text:
                 paragraph.text = paragraph.text.replace(key, value)
     doc.save(output_path)
+
+# Function to convert Word to PDF
+def convert_to_pdf(word_path, pdf_path):
+    pypandoc.convert_file(word_path, 'pdf', outputfile=pdf_path)
 
 # Streamlit app
 st.set_page_config(layout="wide")
@@ -61,9 +58,8 @@ with st.form("bank_draft_form"):
             word_path = f"{output_dir}/{client_name}_{bank_name}_BankDraft.docx"
             pdf_path = f"{output_dir}/{client_name}_{bank_name}_BankDraft.pdf"
             generate_word_draft(Templates["bank_draft"], word_path, replacements)
-            convert(word_path)  # Convert Word to PDF
+            convert_to_pdf(word_path, pdf_path)  # Convert Word to PDF
             st.success(f"Bank Draft Generated: {word_path} and {pdf_path}")
-            st.text_area("Generated Files", value=f"{word_path}\n{pdf_path}", height=100)
         else:
             st.error("Please fill in all required fields.")
 
@@ -99,9 +95,8 @@ with st.form("settlement_draft_form"):
             word_path = f"{output_dir}/{client_name}_{bank_name}_SettlementDraft.docx"
             pdf_path = f"{output_dir}/{client_name}_{bank_name}_SettlementDraft.pdf"
             generate_word_draft(Templates["settlement_draft"], word_path, replacements)
-            convert(word_path)  # Convert Word to PDF
+            convert_to_pdf(word_path, pdf_path)  # Convert Word to PDF
             st.success(f"Settlement Draft Generated: {word_path} and {pdf_path}")
-            st.text_area("Generated Files", value=f"{word_path}\n{pdf_path}", height=100)
         else:
             st.error("Please fill in all required fields.")
 
@@ -132,10 +127,7 @@ with st.form("cessation_draft_form"):
             word_path = f"{output_dir}/{client_name}_{bank_name}_CessationDraft.docx"
             pdf_path = f"{output_dir}/{client_name}_{bank_name}_CessationDraft.pdf"
             generate_word_draft(Templates["cessation_draft"], word_path, replacements)
-            convert(word_path)  # Convert Word to PDF
+            convert_to_pdf(word_path, pdf_path)  # Convert Word to PDF
             st.success(f"Cessation Draft Generated: {word_path} and {pdf_path}")
-            st.text_area("Generated Files", value=f"{word_path}\n{pdf_path}", height=100)
         else:
             st.error("Please fill in all required fields.")
-
-pythoncom.CoUninitialize()
