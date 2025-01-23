@@ -1,6 +1,3 @@
-pdfkit
-wkhtmltopdf
 streamlit
 python-docx
-pypandoc
-docx2pdf
+
