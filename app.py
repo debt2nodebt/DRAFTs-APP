@@ -1,11 +1,6 @@
-import pythoncom
-import win32com.client
 import streamlit as st
 from docx import Document
 from io import BytesIO
-from docx2pdf import convert
-
-pythoncom.CoInitialize()
 
 # Updated template paths based on your GitHub structure
 Templates = {
@@ -132,5 +127,3 @@ if submitted_cessation_draft and client_name and bank_name:
         file_name=f"{client_name}_{bank_name}_CessationDraft.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
-
-pythoncom.CoUninitialize()
