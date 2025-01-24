@@ -3,12 +3,14 @@ from docx import Document
 from io import BytesIO
 import os
 
-# Get the absolute path to the templates directory
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Define the path to the templates folder
+TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), "templates")
+
+# Predefined template paths
 Templates = {
-    "bank_draft": os.path.join(BASE_DIR, "templates", "Python Bank Draft Template.docx"),
-    "cessation_draft": os.path.join(BASE_DIR, "templates", "Python Cessation Template.docx"),
-    "settlement_draft": os.path.join(BASE_DIR, "templates", "Python settlement draft template.docx")
+    "bank_draft": os.path.join(TEMPLATES_DIR, "Python Bank Draft Template.docx"),
+    "cessation_draft": os.path.join(TEMPLATES_DIR, "Python Cessation Template.docx"),
+    "settlement_draft": os.path.join(TEMPLATES_DIR, "Python settlement draft template.docx")
 }
 
 # Function to generate Word draft and return as bytes
@@ -137,27 +139,3 @@ if submitted_cessation_draft and client_name and bank_name:
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
 
-# Option for users to upload their own templates
-st.subheader("4. Upload Custom Template")
-uploaded_file = st.file_uploader("Upload a Word template", type=["docx"])
-
-if uploaded_file:
-    st.success("Template uploaded successfully. Fill in the placeholders and download the document.")
-    with st.form("custom_draft_form"):
-        st.write("Enter values for placeholders:")
-        placeholder_values = st.text_area("Provide replacements in JSON format (e.g. {\"{Placeholder1}\": \"Value1\", \"{Placeholder2}\": \"Value2\"})")
-        submitted_custom_draft = st.form_submit_button("Generate Custom Document")
-    
-    if submitted_custom_draft and placeholder_values:
-        try:
-            replacements = eval(placeholder_values)
-            word_file = generate_word_draft(uploaded_file, replacements)
-            if word_file:
-                st.download_button(
-                    label="Download Custom Draft (Word)",
-                    data=word_file,
-                    file_name="CustomDraft.docx",
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                )
-        except Exception as e:
-            st.error(f"Error processing replacements: {e}")
