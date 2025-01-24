@@ -1,6 +1,7 @@
 import streamlit as st
 from docx import Document
 from io import BytesIO
+from fpdf import FPDF
 import os
 
 # Define the path to the templates folder
@@ -8,9 +9,9 @@ TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), "templates")
 
 # Predefined template paths
 Templates = {
-    "bank_draft": os.path.join(TEMPLATES_DIR, "Python_Bank_Draft_Template.docx"),
-    "cessation_draft": os.path.join(TEMPLATES_DIR, "Python_Cessation_Template.docx"),
-    "settlement_draft": os.path.join(TEMPLATES_DIR, "Python_settlement_draft_template.docx")
+    "bank_draft": os.path.join(TEMPLATES_DIR, "Python Bank Draft Template.docx"),
+    "cessation_draft": os.path.join(TEMPLATES_DIR, "Python Cessation Template.docx"),
+    "settlement_draft": os.path.join(TEMPLATES_DIR, "Python settlement draft template.docx")
 }
 
 # Function to generate Word draft and return as bytes
@@ -30,6 +31,22 @@ def generate_word_draft(template_path, replacements):
     doc.save(doc_io)
     doc_io.seek(0)
     return doc_io
+
+# Function to convert Word content to PDF
+def convert_word_to_pdf(word_file):
+    doc = Document(word_file)
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+
+    for para in doc.paragraphs:
+        pdf.multi_cell(0, 10, para.text)
+
+    pdf_output = BytesIO()
+    pdf.output(pdf_output)
+    pdf_output.seek(0)
+    return pdf_output
 
 # Streamlit app layout configuration
 st.set_page_config(layout="wide")
@@ -68,7 +85,15 @@ if submitted_bank_draft and client_name and bank_name:
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
 
-# Settlement Draft Section
+        pdf_file = convert_word_to_pdf(word_file)
+        st.download_button(
+            label="Download Bank Draft (PDF)",
+            data=pdf_file,
+            file_name=f"{client_name}_{bank_name}_BankDraft.pdf",
+            mime="application/pdf"
+        )
+
+# Repeat for other sections (Settlement and Cessation)
 st.subheader("2. Settlement Draft")
 with st.form("settlement_draft_form"):
     col1, col2, col3 = st.columns(3)
@@ -106,6 +131,14 @@ if submitted_settlement_draft and client_name and bank_name:
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
 
+        pdf_file = convert_word_to_pdf(word_file)
+        st.download_button(
+            label="Download Settlement Draft (PDF)",
+            data=pdf_file,
+            file_name=f"{client_name}_{bank_name}_SettlementDraft.pdf",
+            mime="application/pdf"
+        )
+
 # Cessation Draft Section
 st.subheader("3. Cessation Draft")
 with st.form("cessation_draft_form"):
@@ -139,3 +172,10 @@ if submitted_cessation_draft and client_name and bank_name:
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
 
+        pdf_file = convert_word_to_pdf(word_file)
+        st.download_button(
+            label="Download Cessation Draft (PDF)",
+            data=pdf_file,
+            file_name=f"{client_name}_{bank_name}_CessationDraft.pdf",
+            mime="application/pdf"
+        )
