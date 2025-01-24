@@ -1,7 +1,6 @@
 import streamlit as st
 from docx import Document
 from io import BytesIO
-from fpdf import FPDF
 import os
 
 # Define the path to the templates folder
@@ -32,22 +31,6 @@ def generate_word_draft(template_path, replacements):
     doc_io.seek(0)
     return doc_io
 
-# Function to convert Word draft content to PDF
-def convert_to_pdf(replacements):
-    pdf = FPDF()
-    pdf.set_auto_page_break(auto=True, margin=15)
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    
-    for key, value in replacements.items():
-        pdf.multi_cell(0, 10, f"{key}: {value}")
-    
-    # Write PDF content to BytesIO object
-    pdf_io = BytesIO()
-    pdf.output(pdf_io, "")  # Using empty string to output to BytesIO instead of a file
-    pdf_io.seek(0)
-    return pdf_io
-
 # Streamlit app layout configuration
 st.set_page_config(layout="wide")
 st.title("Document Generator App")
@@ -76,22 +59,13 @@ if submitted_bank_draft and client_name and bank_name:
     }
     
     word_file = generate_word_draft(Templates["bank_draft"], replacements)
-    pdf_file = convert_to_pdf(replacements)
-
+    
     if word_file:
         st.download_button(
             label="Download Bank Draft (Word)",
             data=word_file,
             file_name=f"{client_name}_{bank_name}_BankDraft.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        )
-
-    if pdf_file:
-        st.download_button(
-            label="Download Bank Draft (PDF)",
-            data=pdf_file,
-            file_name=f"{client_name}_{bank_name}_BankDraft.pdf",
-            mime="application/pdf"
         )
 
 # Settlement Draft Section
@@ -123,22 +97,13 @@ if submitted_settlement_draft and client_name and bank_name:
     }
 
     word_file = generate_word_draft(Templates["settlement_draft"], replacements)
-    pdf_file = convert_to_pdf(replacements)
-
+    
     if word_file:
         st.download_button(
             label="Download Settlement Draft (Word)",
             data=word_file,
             file_name=f"{client_name}_{bank_name}_SettlementDraft.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        )
-
-    if pdf_file:
-        st.download_button(
-            label="Download Settlement Draft (PDF)",
-            data=pdf_file,
-            file_name=f"{client_name}_{bank_name}_SettlementDraft.pdf",
-            mime="application/pdf"
         )
 
 # Cessation Draft Section
@@ -165,20 +130,11 @@ if submitted_cessation_draft and client_name and bank_name:
     }
 
     word_file = generate_word_draft(Templates["cessation_draft"], replacements)
-    pdf_file = convert_to_pdf(replacements)
-
+    
     if word_file:
         st.download_button(
             label="Download Cessation Draft (Word)",
             data=word_file,
             file_name=f"{client_name}_{bank_name}_CessationDraft.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        )
-
-    if pdf_file:
-        st.download_button(
-            label="Download Cessation Draft (PDF)",
-            data=pdf_file,
-            file_name=f"{client_name}_{bank_name}_CessationDraft.pdf",
-            mime="application/pdf"
         )
