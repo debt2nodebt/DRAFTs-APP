@@ -4,9 +4,9 @@ from io import BytesIO
 
 # Updated template paths based on your GitHub structure
 Templates = {
-    "bank_draft": "./templates/Python Bank Draft Template.docx",
-    "cessation_draft": "./templates/Python Cessation Template.docx",
-    "settlement_draft": "./templates/Python settlement draft template.docx"
+    "bank_draft": "templates/Python Bank Draft Template.docx",
+    "cessation_draft": "templates/Python Cessation Template.docx",
+    "settlement_draft": "templates/Python settlement draft template.docx"
 }
 
 # Function to generate Word draft and return as bytes
