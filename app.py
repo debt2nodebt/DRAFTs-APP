@@ -44,7 +44,7 @@ def convert_to_pdf(replacements):
     
     # Write PDF content to BytesIO object
     pdf_io = BytesIO()
-    pdf.output(pdf_io)  # Removed 'F' argument to write to file-like object
+    pdf.output(pdf_io, 'F')  # Fix here: using 'F' to write into the BytesIO object
     pdf_io.seek(0)
     return pdf_io
 
