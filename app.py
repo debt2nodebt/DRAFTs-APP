@@ -9,9 +9,9 @@ TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), "templates")
 
 # Predefined template paths
 Templates = {
-    "bank_draft": os.path.join(TEMPLATES_DIR, "Python Bank Draft Template.docx"),
-    "cessation_draft": os.path.join(TEMPLATES_DIR, "Python Cessation Template.docx"),
-    "settlement_draft": os.path.join(TEMPLATES_DIR, "Python settlement draft template.docx")
+    "bank_draft": os.path.join(TEMPLATES_DIR, "Python_Bank_Draft_Template.docx"),
+    "cessation_draft": os.path.join(TEMPLATES_DIR, "Python_Cessation_Template.docx"),
+    "settlement_draft": os.path.join(TEMPLATES_DIR, "Python_settlement_draft_template.docx")
 }
 
 # Function to generate Word draft and return as bytes
