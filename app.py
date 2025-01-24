@@ -42,8 +42,9 @@ def convert_to_pdf(replacements):
     for key, value in replacements.items():
         pdf.multi_cell(0, 10, f"{key}: {value}")
     
+    # Write PDF content to BytesIO object
     pdf_io = BytesIO()
-    pdf.output(pdf_io, 'F')
+    pdf.output(pdf_io)  # Removed 'F' argument to write to file-like object
     pdf_io.seek(0)
     return pdf_io
 
