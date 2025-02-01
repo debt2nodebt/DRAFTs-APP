@@ -2,7 +2,6 @@ import streamlit as st
 from docx import Document
 from io import BytesIO
 import os
-import pdfkit  # Import pdfkit for PDF conversion
 from docx.shared import Pt
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
@@ -18,18 +17,18 @@ Templates = {
     "settlement_draft": os.path.join(TEMPLATES_DIR, "Python_settlement_draft_template.docx")
 }
 
-# Function to generate Word draft
+# Function to generate Word draft and return as bytes
 def generate_word_draft(template_path, replacements):
     if not os.path.exists(template_path):
         st.error(f"Error: Template file not found at '{template_path}'")
-        return None, None
+        return None
 
     doc = Document(template_path)
 
     # Function to apply Times New Roman font
     def apply_font(run):
         run.font.name = "Times New Roman"
-        run.font.size = Pt(12)  # Set font size
+        run.font.size = Pt(11)  # Set font size
         run.font.color.rgb = RGBColor(0, 0, 0)  # Set black color
 
         # Ensure compatibility with older Word versions
@@ -69,15 +68,7 @@ def generate_word_draft(template_path, replacements):
     doc_io = BytesIO()
     doc.save(doc_io)
     doc_io.seek(0)
-
     return doc_io
-
-# Function to generate PDF using pdfkit
-def generate_pdf(text):
-    pdf_io = BytesIO()
-    pdfkit.from_string(text, pdf_io, options={"quiet": ""})
-    pdf_io.seek(0)
-    return pdf_io
 
 # Streamlit app layout configuration
 st.set_page_config(layout="wide")
@@ -116,11 +107,73 @@ if submitted_bank_draft and client_name and bank_name:
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
 
-        # Convert to PDF using pdfkit
-        pdf_file = generate_pdf(f"Bank Draft for {client_name} at {bank_name}")
+# Settlement Draft Section
+st.subheader("2. Settlement Draft")
+with st.form("settlement_draft_form"):
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        bank_name = st.text_input("Bank Name", key="settlement_bank_name")
+        loan_type = st.text_input("Loan Type", key="settlement_loan_type")
+    with col2:
+        loan_number = st.text_input("Loan Number", key="settlement_loan_number")
+        loan_amount = st.text_input("Loan Amount", key="settlement_loan_amount")
+    with col3:
+        one_time_payment = st.text_input("One Time Payment", key="settlement_one_time_payment")
+        client_name = st.text_input("Client Name", key="settlement_client_name")
+        our_mobile_number = st.text_input("Mobile Number", key="settlement_mobile_number")
+    
+    submitted_settlement_draft = st.form_submit_button("Generate Settlement Draft")
+
+if submitted_settlement_draft and client_name and bank_name:
+    replacements = {
+        "{BankName}": bank_name,
+        "{LoanType}": loan_type,
+        "{LoanNumber}": loan_number,
+        "{LoanAmount}": loan_amount,
+        "{OneTimePayment}": one_time_payment,
+        "{ClientName}": client_name,
+        "{OurMobileNumber}": our_mobile_number
+    }
+
+    word_file = generate_word_draft(Templates["settlement_draft"], replacements)
+    
+    if word_file:
         st.download_button(
-            label="Download Bank Draft (PDF)",
-            data=pdf_file,
-            file_name=f"{client_name}_{bank_name}_BankDraft.pdf",
-            mime="application/pdf"
+            label="Download Settlement Draft (Word)",
+            data=word_file,
+            file_name=f"{client_name}_{bank_name}_SettlementDraft.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+
+# Cessation Draft Section
+st.subheader("3. Cessation Draft")
+with st.form("cessation_draft_form"):
+    col1, col2 = st.columns(2)
+    with col1:
+        bank_name = st.text_input("Bank Name", key="cessation_bank_name")
+        client_name = st.text_input("Client Name", key="cessation_client_name")
+    with col2:
+        loan_type = st.text_input("Loan Type", key="cessation_loan_type")
+        loan_number = st.text_input("Loan Number", key="cessation_loan_number")
+        mobile_number = st.text_input("Mobile Number", key="cessation_mobile_number")
+    
+    submitted_cessation_draft = st.form_submit_button("Generate Cessation Draft")
+
+if submitted_cessation_draft and client_name and bank_name:
+    replacements = {
+        "{BankName}": bank_name,
+        "{ClientName}": client_name,
+        "{LoanType}": loan_type,
+        "{LoanNumber}": loan_number,
+        "{MobileNumber}": mobile_number
+    }
+
+    word_file = generate_word_draft(Templates["cessation_draft"], replacements)
+    
+    if word_file:
+        st.download_button(
+            label="Download Cessation Draft (Word)",
+            data=word_file,
+            file_name=f"{client_name}_{bank_name}_CessationDraft.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
