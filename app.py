@@ -18,14 +18,31 @@ def generate_word_draft(template_path, replacements):
     if not os.path.exists(template_path):
         st.error(f"Error: Template file not found at '{template_path}'")
         return None
-    
+
     doc = Document(template_path)
+
+    # Replace placeholders in paragraphs
     for paragraph in doc.paragraphs:
-        for run in paragraph.runs:
-            for key, value in replacements.items():
-                if key in run.text:
-                    run.text = run.text.replace(key, value)
-    
+        full_text = "".join(run.text for run in paragraph.runs)  # Get complete paragraph text
+        for key, value in replacements.items():
+            if key in full_text:
+                full_text = full_text.replace(key, value)  # Replace placeholders
+        
+        # Clear and rewrite runs to maintain formatting
+        if paragraph.runs:
+            paragraph.clear()
+            paragraph.add_run(full_text)
+
+    # Replace placeholders in tables (if any)
+    for table in doc.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                full_text = cell.text
+                for key, value in replacements.items():
+                    if key in full_text:
+                        full_text = full_text.replace(key, value)
+                    cell.text = full_text  # Update cell content
+
     # Save document to bytes
     doc_io = BytesIO()
     doc.save(doc_io)
