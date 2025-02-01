@@ -21,9 +21,10 @@ def generate_word_draft(template_path, replacements):
     
     doc = Document(template_path)
     for paragraph in doc.paragraphs:
-        for key, value in replacements.items():
-            if key in paragraph.text:
-                paragraph.text = paragraph.text.replace(key, value)
+        for run in paragraph.runs:
+            for key, value in replacements.items():
+                if key in run.text:
+                    run.text = run.text.replace(key, value)
     
     # Save document to bytes
     doc_io = BytesIO()
