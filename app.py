@@ -28,7 +28,7 @@ def generate_word_draft(template_path, replacements):
     # Function to apply Times New Roman font
     def apply_font(run):
         run.font.name = "Times New Roman"
-        run.font.size = Pt(12)  # Set font size
+        run.font.size = Pt(11)  # Set font size
         run.font.color.rgb = RGBColor(0, 0, 0)  # Set black color
 
         # Ensure compatibility with older Word versions
