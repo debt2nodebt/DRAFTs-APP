@@ -2,6 +2,10 @@ import streamlit as st
 from docx import Document
 from io import BytesIO
 import os
+from docx.shared import Pt
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+from docx.shared import RGBColor
 
 # Define the path to the templates folder
 TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), "templates")
@@ -21,19 +25,32 @@ def generate_word_draft(template_path, replacements):
 
     doc = Document(template_path)
 
+    # Function to apply Times New Roman font
+    def apply_font(run):
+        run.font.name = "Times New Roman"
+        run.font.size = Pt(12)  # Set font size
+        run.font.color.rgb = RGBColor(0, 0, 0)  # Set black color
+
+        # Ensure compatibility with older Word versions
+        rPr = run._element.get_or_add_rPr()
+        rFonts = OxmlElement("w:rFonts")
+        rFonts.set(qn("w:ascii"), "Times New Roman")
+        rFonts.set(qn("w:hAnsi"), "Times New Roman")
+        rPr.append(rFonts)
+
     # Replace placeholders in paragraphs
     for paragraph in doc.paragraphs:
-        full_text = "".join(run.text for run in paragraph.runs)  # Get complete paragraph text
+        full_text = "".join(run.text for run in paragraph.runs)
         for key, value in replacements.items():
             if key in full_text:
-                full_text = full_text.replace(key, value)  # Replace placeholders
-        
-        # Clear and rewrite runs to maintain formatting
+                full_text = full_text.replace(key, value)
+
         if paragraph.runs:
             paragraph.clear()
-            paragraph.add_run(full_text)
+            new_run = paragraph.add_run(full_text)
+            apply_font(new_run)
 
-    # Replace placeholders in tables (if any)
+    # Replace placeholders in tables and apply font settings
     for table in doc.tables:
         for row in table.rows:
             for cell in row.cells:
@@ -42,6 +59,10 @@ def generate_word_draft(template_path, replacements):
                     if key in full_text:
                         full_text = full_text.replace(key, value)
                     cell.text = full_text  # Update cell content
+
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        apply_font(run)
 
     # Save document to bytes
     doc_io = BytesIO()
