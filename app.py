@@ -13,7 +13,7 @@ TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), "templates")
 # Predefined template paths
 Templates = {
     "bank_draft": os.path.join(TEMPLATES_DIR, "Python Bank Draft Template.docx"),
-    "cessation_draft": os.path.join(TEMPLATES_DIR, "Python_Cessation_Template.docx"),
+    "cessation_draft": os.path.join(TEMPLATES_DIR, "Python Cessation Template.docx"),
     "settlement_draft": os.path.join(TEMPLATES_DIR, "Python_settlement_draft_template.docx")
 }
 
