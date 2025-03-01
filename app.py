@@ -119,7 +119,7 @@ with st.form("bank_draft_form2"):
         client_name = st.text_input("Client Name", key="bank_draft_client_name")
         mobile_number = st.text_input("Mobile Number", key="bank_draft_mobile_number")
     
-    submitted_bank_draft = st.form_submit_button("Generate Bank Draft")
+    submitted_bank_draft = st.form_submit_button("Generate Bank Draftt")
 
 if submitted_bank_draft and client_name and bank_name:
     replacements = {
