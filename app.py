@@ -109,7 +109,7 @@ if submitted_bank_draft and client_name and bank_name:
         )
 
 st.subheader("2. Bank Draft for Credit Card")
-with st.form("bank_draft_form"):
+with st.form("bank_draft_form2"):
     col1, col2 = st.columns(2)
     with col1:
         bank_name = st.text_input("Bank Name", key="bank_draft_bank_name")
@@ -141,7 +141,7 @@ if submitted_bank_draft and client_name and bank_name:
         )
 
 # Settlement Draft Section
-st.subheader("2. Settlement Draft")
+st.subheader("3. Settlement Draft")
 with st.form("settlement_draft_form"):
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -179,7 +179,7 @@ if submitted_settlement_draft and client_name and bank_name:
         )
 
 # Cessation Draft Section
-st.subheader("3. Cessation Draft")
+st.subheader("4. Cessation Draft")
 with st.form("cessation_draft_form"):
     col1, col2 = st.columns(2)
     with col1:
