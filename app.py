@@ -109,19 +109,19 @@ if submitted_bank_draft and client_name and bank_name:
         )
 
 st.subheader("2. Bank Draft for Credit Card")
-with st.form("bank_draft_form2"):
+with st.form("bank_draft_form"):
     col1, col2 = st.columns(2)
     with col1:
-        bank_name = st.text_input("Bank Name", key="bank_draft_bank_name")
-        loan_type = st.text_input("Loan Type", key="bank_draft_loan_type")
+        bank_name = st.text_input("Bank Name", key="bank_draft_bank_namee")
+        loan_type = st.text_input("Loan Type", key="bank_draft_loan_typee")
     with col2:
-        loan_number = st.text_input("Loan Number", key="bank_draft_loan_number")
-        client_name = st.text_input("Client Name", key="bank_draft_client_name")
-        mobile_number = st.text_input("Mobile Number", key="bank_draft_mobile_number")
+        loan_number = st.text_input("Loan Number", key="bank_draft_loan_numberr")
+        client_name = st.text_input("Client Name", key="bank_draft_client_namee")
+        mobile_number = st.text_input("Mobile Number", key="bank_draft_mobile_numberr")
     
-    submitted_bank_draft = st.form_submit_button("Generate Bank Draftt")
+    submitted_bank_draftt = st.form_submit_button("Generate Bank Drafttt")
 
-if submitted_bank_draft and client_name and bank_name:
+if submitted_bank_draftt and client_name and bank_name:
     replacements = {
         "{BankName}": bank_name,
         "{LoanType}": loan_type,
@@ -134,7 +134,7 @@ if submitted_bank_draft and client_name and bank_name:
     
     if word_file:
         st.download_button(
-            label="Download Bank Draft (Word)",
+            label="Download Bank Draftt (Word)",
             data=word_file,
             file_name=f"{client_name}_{bank_name}_BankDraft.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
