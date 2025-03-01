@@ -109,7 +109,7 @@ if submitted_bank_draft and client_name and bank_name:
         )
 
 st.subheader("2. Bank Draft for Credit Card")
-with st.form("bank_draft_form"):
+with st.form("bank_draft_formm"):
     col1, col2 = st.columns(2)
     with col1:
         bank_name = st.text_input("Bank Name", key="bank_draft_bank_namee")
