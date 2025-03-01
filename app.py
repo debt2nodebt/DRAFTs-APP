@@ -13,6 +13,7 @@ TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), "templates")
 # Predefined template paths
 Templates = {
     "bank_draft": os.path.join(TEMPLATES_DIR, "Python Bank Draft Template.docx"),
+    "bank_draft2": os.path.join(TEMPLATES_DIR, "Python Bank Draft Credit Card.docx"),
     "cessation_draft": os.path.join(TEMPLATES_DIR, "Python Cessation Template.docx"),
     "settlement_draft": os.path.join(TEMPLATES_DIR, "Python_settlement_draft_template.docx")
 }
@@ -75,7 +76,7 @@ st.set_page_config(layout="wide")
 st.title("Document Generator App")
 
 # Bank Draft Section
-st.subheader("1. Bank Draft for Credit Card")
+st.subheader("1. Bank Draft for Personal Loan")
 with st.form("bank_draft_form"):
     col1, col2 = st.columns(2)
     with col1:
@@ -98,6 +99,38 @@ if submitted_bank_draft and client_name and bank_name:
     }
     
     word_file = generate_word_draft(Templates["bank_draft"], replacements)
+    
+    if word_file:
+        st.download_button(
+            label="Download Bank Draft (Word)",
+            data=word_file,
+            file_name=f"{client_name}_{bank_name}_BankDraft.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+
+st.subheader("2. Bank Draft for Credit Card")
+with st.form("bank_draft_form"):
+    col1, col2 = st.columns(2)
+    with col1:
+        bank_name = st.text_input("Bank Name", key="bank_draft_bank_name")
+        loan_type = st.text_input("Loan Type", key="bank_draft_loan_type")
+    with col2:
+        loan_number = st.text_input("Loan Number", key="bank_draft_loan_number")
+        client_name = st.text_input("Client Name", key="bank_draft_client_name")
+        mobile_number = st.text_input("Mobile Number", key="bank_draft_mobile_number")
+    
+    submitted_bank_draft = st.form_submit_button("Generate Bank Draft")
+
+if submitted_bank_draft and client_name and bank_name:
+    replacements = {
+        "{BankName}": bank_name,
+        "{LoanType}": loan_type,
+        "{LoanNumber}": loan_number,
+        "{ClientName}": client_name,
+        "{MobileNumber}": mobile_number
+    }
+    
+    word_file = generate_word_draft(Templates["bank_draft2"], replacements)
     
     if word_file:
         st.download_button(
