@@ -75,7 +75,7 @@ st.set_page_config(layout="wide")
 st.title("Document Generator App")
 
 # Bank Draft Section
-st.subheader("1. Bank Draft")
+st.subheader("1. Bank Draft for Credit Card")
 with st.form("bank_draft_form"):
     col1, col2 = st.columns(2)
     with col1:
