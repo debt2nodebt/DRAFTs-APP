@@ -51,7 +51,7 @@ def generate_word_draft(template_path, replacements):
             new_run = paragraph.add_run(full_text)
             apply_font(new_run)
 
-    # Replace placeholders in tables and apply font settings
+    # Replace placeholders in tables and  apply the real font settings
     for table in doc.tables:
         for row in table.rows:
             for cell in row.cells:
