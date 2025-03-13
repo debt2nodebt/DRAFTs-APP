@@ -151,7 +151,7 @@ with st.form("settlement_draft_form"):
         loan_number = st.text_input("Loan Number", key="settlement_loan_number")
         loan_amount = st.text_input("Loan Amount", key="settlement_loan_amount")
     with col3:
-        one_time_payment = st.text_input("One Time Payment", key="settlement_one_time_payment")
+        one_time_payment = st.text_input("Settlement Amount", key="settlement_one_time_payment")
         client_name = st.text_input("Client Name", key="settlement_client_name")
         our_mobile_number = st.text_input("Mobile Number", key="settlement_mobile_number")
     
